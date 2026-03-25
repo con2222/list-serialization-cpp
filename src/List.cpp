@@ -104,6 +104,41 @@ void List::clear_list() {
 	tail = nullptr;
 }
 
+bool List::save_to_text(std::string_view filename) const {
+    if (head == nullptr) { return false; }
+
+    std::unordered_map<ListNode*, int32_t> nodeToIndex;
+    ListNode* current = head;
+    int32_t index = 0;
+    while (current != nullptr) {
+        nodeToIndex[current] = index++;
+        current = current->next;
+    }
+
+    std::ofstream file(filename.data());
+    if (!file.is_open()) {
+        std::cout << "Не удалось открыть файл для сохранения текста!" << std::endl;
+        return false;
+    }
+
+    current = head;
+    while (current != nullptr) {
+        file << current->data << ";";
+        
+        if (current->rand != nullptr) {
+            file << nodeToIndex.at(current->rand);
+        } else {
+            file << "-1"; 
+        }
+        
+        file << "\n";
+        current = current->next;
+    }
+
+    file.close();
+    return true;
+}
+
 void List::print_list(ListNode* head) const {
 	ListNode* currentNode = head;
 	while (currentNode != nullptr) {
