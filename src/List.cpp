@@ -1,19 +1,12 @@
+#include "List.hpp"
+
+// std
 #include <iostream>
 #include <fstream>
-#include <vector>
-#include <string>
-#include <unordered_map>
-#include <cstring>
 
+List::List() : head(nullptr), tail(nullptr) {}
 
-struct ListNode {
-    ListNode* prev = nullptr;
-    ListNode* next = nullptr;
-    ListNode* rand = nullptr;
-    std::string data;
-};
-
-ListNode* push_back(ListNode*& head, ListNode*& tail, std::string data) {
+ListNode* List::push_back(std::string data) {
     if (head == nullptr && tail == nullptr) {
         head = new ListNode();
         head->data = data;
@@ -29,29 +22,24 @@ ListNode* push_back(ListNode*& head, ListNode*& tail, std::string data) {
 	return newNode;
 }
 
-int find_node_index(ListNode* currentNode, const std::unordered_map<ListNode*, int>& randIndexMap) {
-    if (currentNode->rand == nullptr) {return -1;}
-	return randIndexMap.at(currentNode->rand);
-}
-
-void add_links(std::vector<ListNode*>& nodes, std::vector<int>& randIndexes) {
+void List::add_links(std::vector<ListNode*>& nodes, std::vector<int32_t>& randIndexes) {
     if (nodes.empty() || nodes.size() != randIndexes.size()) {return;}
 
-	for (size_t i = 0; i < nodes.size(); i++) {
+	for (uint32_t i = 0; i < nodes.size(); i++) {
 		if (randIndexes[i] != -1) {
 			nodes[i]->rand = nodes[randIndexes[i]];
 		}
 	}
 }
 
-bool serialize_list(ListNode* head, const std::unordered_map<ListNode*, int>& randIndexMap) {
+bool List::serialize_list(const std::unordered_map<ListNode*, int32_t>& randIndexMap, std::string_view filename) {
     if (head == nullptr) {return false;}
 
-    int randIndex = -1;
-    size_t len = 0;
+    int32_t randIndex = -1;
+    uint32_t len = 0;
     ListNode* currentNode = head;
 
-    std::ofstream file("outlet.out", std::ios::binary);
+    std::ofstream file(filename.data(), std::ios::binary);
     if (!file.is_open()) {
         std::cout << "Не удалось открыть файл на запись!" << std::endl;
         return false;
@@ -62,7 +50,7 @@ bool serialize_list(ListNode* head, const std::unordered_map<ListNode*, int>& ra
     while (currentNode != nullptr) {
         len = currentNode->data.size();
         randIndex = find_node_index(currentNode, randIndexMap);
-		size_t total_size = sizeof(len) + len + sizeof(randIndex);
+		uint32_t total_size = sizeof(len) + len + sizeof(randIndex);
 
 		buffer.resize(total_size);
 		std::memcpy(&buffer[0], &len, sizeof(len));
@@ -77,17 +65,17 @@ bool serialize_list(ListNode* head, const std::unordered_map<ListNode*, int>& ra
     return true;
 }
 
-bool deserialize_list(ListNode*& head, ListNode*& tail) {
-	std::ifstream file("outlet.out", std::ios::binary);
+bool List::deserialize_list(std::string_view& filename) {
+	std::ifstream file(filename.data(), std::ios::binary);
 	if (!file.is_open()) {
 		std::cout << "Не удалось открыть файл на чтение!" << std::endl;
         return false;
 	}
 
-	std::vector<int> randIndexes;
+	std::vector<int32_t> randIndexes;
 	std::vector<ListNode*> nodes;
-	int randIndex = -1;
-	size_t len = 0;
+	int32_t randIndex = -1;
+	uint32_t len = 0;
 
 	while (file.read(reinterpret_cast<char*>(&len), sizeof(len))) {
 		std::string str;
@@ -97,7 +85,7 @@ bool deserialize_list(ListNode*& head, ListNode*& tail) {
 		file.read(reinterpret_cast<char*>(&randIndex), sizeof(randIndex));
 
 		randIndexes.push_back(randIndex);
-		nodes.push_back(push_back(head, tail, str));
+		nodes.push_back(push_back(str));
 	}
 	add_links(nodes, randIndexes);
 
@@ -105,7 +93,7 @@ bool deserialize_list(ListNode*& head, ListNode*& tail) {
 	return true;
 }
 
-void clear_list(ListNode*& head, ListNode*& tail) {
+void List::clear_list() {
 	ListNode* currentNode = head;
 	while (currentNode != nullptr) {
 		ListNode* temp = currentNode;
@@ -116,7 +104,7 @@ void clear_list(ListNode*& head, ListNode*& tail) {
 	tail = nullptr;
 }
 
-void print_list(ListNode* head) {
+void List::print_list(ListNode* head) const {
 	ListNode* currentNode = head;
 	while (currentNode != nullptr) {
 		if (currentNode->rand != nullptr) {
@@ -128,39 +116,11 @@ void print_list(ListNode* head) {
 	}
 }
 
-int main() {
-    std::ifstream file("inlet.in");
-	if (!file.is_open()) {
-        std::cout << "File not found" << std::endl;
-        return 1;
-    }
+int32_t List::find_node_index(ListNode* currentNode, const std::unordered_map<ListNode*, int32_t>& randIndexMap) const {
+    if (currentNode->rand == nullptr) {return -1;}
+	return randIndexMap.at(currentNode->rand);
+}
 
-    std::vector<ListNode*> nodes;
-	std::vector<int> randIndexes;
-	std::unordered_map<ListNode*, int> randIndexMap;
-	int counter = 0;
-
-    ListNode* head = nullptr;
-    ListNode* tail = nullptr;
-
-    std::string line;
-    while (std::getline(file, line)) {
-		int pos = line.rfind(';');
-
-        int n = std::stoi(&line[pos + 1]);
-    	line.resize(pos);
-
-		ListNode* newNode = push_back(head, tail, line);
-        randIndexMap.insert(std::make_pair(newNode, counter++));
-        nodes.push_back(newNode);
-		randIndexes.push_back(n);
-    }
-    add_links(nodes, randIndexes);
-
-    serialize_list(head, randIndexMap);
-
-	clear_list(head, tail);
-    file.close();
-
-	return 0;
+List::~List() {
+	clear_list();
 }
