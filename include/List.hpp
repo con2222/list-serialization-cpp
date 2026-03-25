@@ -25,7 +25,7 @@ public:
 	bool deserialize_list(std::string_view& filename);
 	void clear_list();
 
-	
+	bool save_to_text(std::string_view filename) const;
 	void print_list(ListNode* head) const;
 
 	~List();

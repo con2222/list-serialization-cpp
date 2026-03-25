@@ -5,6 +5,11 @@
 struct AppConfig {
     std::string_view inputFilename;
     std::string_view outputFilename;
+    
+    bool isDeserializeMode = false;
+    std::string_view deserializeInput;
+    std::string_view deserializeOutput;
+
     bool showHelp = false;
     bool isValid = true;
 };
