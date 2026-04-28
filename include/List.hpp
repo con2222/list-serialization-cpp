@@ -22,11 +22,14 @@ public:
 
 	void add_links(std::vector<ListNode*>& nodes, std::vector<int32_t>& randIndexes);
 	bool serialize_list(const std::unordered_map<ListNode*, int32_t>& randIndexMap, std::string_view filename);
-	bool deserialize_list(std::string_view& filename);
+	bool deserialize_list(std::string_view filename);
 	void clear_list();
 
 	bool save_to_text(std::string_view filename) const;
 	void print_list(ListNode* head) const;
+
+	List(const List&) = delete;
+	List& operator=(const List&) = delete;
 
 	~List();
 

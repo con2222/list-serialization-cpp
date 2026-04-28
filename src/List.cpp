@@ -15,7 +15,7 @@ ListNode* List::push_back(std::string data) {
     }
 
     ListNode* newNode = new ListNode();
-    newNode->data = data;
+    newNode->data = std::move(data);
     newNode->prev = tail;
     tail->next = newNode;
     tail = newNode;
@@ -50,13 +50,20 @@ bool List::serialize_list(const std::unordered_map<ListNode*, int32_t>& randInde
     while (currentNode != nullptr) {
         len = currentNode->data.size();
         randIndex = find_node_index(currentNode, randIndexMap);
-		uint32_t total_size = sizeof(len) + len + sizeof(randIndex);
+		//uint32_t total_size = sizeof(len) + len + sizeof(randIndex);
 
+        /*
 		buffer.resize(total_size);
 		std::memcpy(&buffer[0], &len, sizeof(len));
 		std::memcpy(&buffer[sizeof(len)], currentNode->data.c_str(), len);
 		std::memcpy(&buffer[sizeof(len) + len], &randIndex, sizeof(randIndex));
 		file.write(buffer.data(), total_size);
+        */
+
+        file.write(reinterpret_cast<const char*>(&len), sizeof(len));
+        file.write(currentNode->data.c_str(), len);
+        file.write(reinterpret_cast<const char*>(&randIndex), sizeof(randIndex));
+            
 
         currentNode = currentNode->next;
     }
@@ -65,7 +72,7 @@ bool List::serialize_list(const std::unordered_map<ListNode*, int32_t>& randInde
     return true;
 }
 
-bool List::deserialize_list(std::string_view& filename) {
+bool List::deserialize_list(std::string_view filename) {
 	std::ifstream file(filename.data(), std::ios::binary);
 	if (!file.is_open()) {
 		std::cout << "Не удалось открыть файл на чтение!" << std::endl;
@@ -81,7 +88,7 @@ bool List::deserialize_list(std::string_view& filename) {
 		std::string str;
 		str.resize(len);
 
-		file.read(&str[0], len);
+		file.read(str.data(), len);
 		file.read(reinterpret_cast<char*>(&randIndex), sizeof(randIndex));
 
 		randIndexes.push_back(randIndex);

@@ -46,7 +46,7 @@ bool populate_list_from_file(List& list, std::unordered_map<ListNode*, int32_t>&
 
         line.resize(pos);
 
-        ListNode* newNode = list.push_back(line);
+        ListNode* newNode = list.push_back(std::move(line));
         randIndexMap.insert(std::make_pair(newNode, counter++));
         nodes.push_back(newNode);
         randIndexes.push_back(n);

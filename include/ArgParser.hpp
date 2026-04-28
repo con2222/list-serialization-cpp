@@ -14,7 +14,7 @@ struct AppConfig {
     bool isValid = true;
 };
 
-std::string_view get_cmd_option(char** begin, char** end,  const std::string& option, const std::string& defaultValue = "");
+std::string_view get_cmd_option(char** begin, char** end,  const std::string& option, std::string_view defaultValue = "");
 bool cmd_option_exists(char** begin, char** end, const std::string& option);
 
 AppConfig parse_arguments(int argc, char* argv[]);

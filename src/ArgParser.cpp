@@ -4,7 +4,7 @@
 #include <iostream>
 #include <algorithm>
 
-std::string_view get_cmd_option(char** begin, char** end,  const std::string& option, const std::string& defaultValue) {
+std::string_view get_cmd_option(char** begin, char** end,  const std::string& option, std::string_view defaultValue) {
     char** itr = std::find(begin, end, option);
     if (itr != end && ++itr != end) {
         return std::string_view(*itr);
